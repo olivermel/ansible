@@ -1,0 +1,212 @@
+---
+#- hosts: host2
+#  user: root
+#  tasks:
+
+- name: Install EPEL Repository
+  command: yum -y install epel-release
+
+- name: Update the Entire system (PATCH SYSTEM).......
+  command: yum update -y
+
+- name: Install Apache
+  yum:
+    name: "{{ item }}"
+  with_items:
+      - deltarpm
+      - httpd
+      - php-pgsql
+
+- name: Disable the pre-set Apache welcome page
+  template:
+      src: welcome.conf.j2
+      dest: "{{ apache_welcome_page }}"
+
+- name: Deny content from Document root to visitors
+  template:
+      src: httpd.conf.j2
+      dest: "{{ apache_conf_file }}"
+
+- name: Restart and enable Apache service
+  service:
+      name: httpd
+      state: restarted
+      enabled: yes
+
+- name: Install MariaDB
+  yum:
+      name: "{{ item }}"
+  with_items:
+      - MySQL-python
+      - mariadb
+      - mariadb-server
+
+- name: Start and enable the MariaDB service
+  service:
+      name: mariadb
+      state: restarted
+      enabled: yes
+
+- name: Copy CNF file with root credentials
+  template:
+      src: my.cnf.j2
+      dest: /root/.my.cnf
+      owner: root
+      mode: 0600
+
+- name: Set Database root password
+  mysql_user:
+      name: root
+      host: "{{ item }}"
+      password: "{{ mysql_root_password }}"
+      state: present
+  with_items:
+      - localhost
+      - 127.0.0.1
+      - ::1
+
+- name: Install PHP
+  yum:
+      name: "{{ item }}"
+  with_items:
+      - php 
+      - php-gd 
+      - php-intl 
+      - php-ldap        
+      - php-ZendFramework 
+      - php-ZendFramework-Db-Adapter-Pdo-Mysql
+      - php-pgsql      
+
+- name: Set Proper Timezone
+  replace:
+      path: /etc/php.ini
+      regexp: ';date.timezone ='
+      replace: ';date.timezone = America/New_York'
+
+- name: Install Icinga@ and its plugins (1)
+  command: rpm --import "{{ icinga_key_link }}" 
+
+- name: Install Icinga@ and its plugins (2)
+  yum:
+      name: "{{ item }}" 
+      state: present
+  with_items:
+      - "{{ icinga_plugin_link }}"
+      - icinga2
+      - nagios-plugins-all
+
+- name: Restart Icinga service
+  service:
+      name: icinga2
+      state: restarted 
+
+- name: Verifying the 3 features (checker, mainlog and notification)
+  command: icinga2 feature list
+
+- name: Setup the Icinga 2 IDO modules
+  yum:
+      name: "{{ item }}"
+  with_items: 
+      - icinga2-ido-mysql
+
+- name: check if DB exists
+  shell: mysql -e 'SHOW DATABASES;' | grep icinga2
+  register: dbstatus
+  ignore_errors: True
+
+- name:  Create Icinga DB
+  command: mysql -NBe "{{ item }}"
+  with_items:
+      - CREATE DATABASE icinga2;
+  register: dbcreated
+  when: dbstatus.rc != False
+
+- name:  Now we populate database for icinga2
+  command: mysql -NBe "{{ item }}"
+  with_items:
+      - CREATE DATABASE icinga;
+      - GRANT SELECT, INSERT, UPDATE, DELETE, DROP, CREATE VIEW, INDEX, EXECUTE ON icinga.* TO 'icinga'@'localhost' IDENTIFIED BY 'icinga';
+      - FLUSH PRIVILEGES;
+  when: dbstatus.rc != False
+
+- name: Import the Icinga 2 IDO schema
+  shell: mysql -u root  icinga < /usr/share/icinga2-ido-mysql/schema/mysql.sql
+  when: dbstatus.rc != False
+
+- name: Modifying ido-mysql.conf
+  template:
+      src: ido-mysql.conf.j2
+      dest: "{{ icinga_ido_conf }}"
+
+- name: Enable the ido-mysql feature
+  command: icinga2 feature enable ido-mysql
+
+- name: Restart Icinga service
+  service:
+      name: icinga2
+      state: restarted
+
+- name: Install Icinga Web 2
+  command: icinga2 feature enable command
+
+- name: Restart Icinga service
+  service:
+      name: icinga2
+      state: restarted
+
+- name: Adding he "apache" user to the icingacmd group
+  user:
+      name: apache
+      group: icingacmd 
+      append: yes
+
+- name: Install the icingaweb2 and icingacli RPM packages
+  yum:
+      name: "{{ item }}"
+  with_items:
+      - icingaweb2 
+      - icingacli
+
+- name: Point the Apache web root directory to the location of Icinga Web 2
+  command: icingacli setup config webserver apache --document-root /usr/share/icingaweb2/public
+
+- name: Restart Apache
+  service:    
+      name: httpd
+      state: restarted
+
+- pause:
+      prompt: " FOR A FIRST TIME INSTALL, 
+                PLEASE RUN THE FOLLOWING COMMAND 
+                THE REMOTE MACHINE..............
+                
+                icingacli setup token create
+
+                AND TAKE NOTE OF THE TOKEN GENERATED, 
+                YOU WILL USE THAT LATER
+
+                press CTRL-C and then press C to continue"
+
+- name: Enable Firewalld
+  service: 
+      name: firewalld
+      state: restarted
+      enabled: yes
+
+- name: Allow Apache access through firewalld
+  firewalld:
+      service: http
+      permanent: true
+      state: enabled
+      immediate: yes
+
+- pause:
+      prompt: " Now you can point your web browser to
+                http://<your-server-ip>/icingaweb2/setup
+
+                go to the following link to get howto
+                on setup
+
+                https://www.vultr.com/docs/how-to-install-icinga-2-and-icinga-web-2-on-centos-7
+
+                Press 'C' to continue                       "

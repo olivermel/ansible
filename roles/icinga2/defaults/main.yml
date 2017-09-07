@@ -1,0 +1,10 @@
+--- 
+mysql_root_password: root101
+
+apache_welcome_page: /etc/httpd/conf.d/welcome.conf
+apache_conf_file:    /etc/httpd/conf/httpd.conf
+
+icinga_plugin_link: https://packages.icinga.org/epel/7/release/noarch/icinga-rpm-release-7-1.el7.centos.noarch.rpm
+icinga_key_link:    http://packages.icinga.org/icinga.key
+
+icinga_ido_conf: /etc/icinga2/features-available/ido-mysql.conf
