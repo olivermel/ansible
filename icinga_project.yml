@@ -1,0 +1,7 @@
+- hosts: host2
+  remote_user: root
+  become_user: yes
+  roles:
+#    - { role: icinga2 }
+#    - { role: docker-apache}
+    - { role: docker-mysql}

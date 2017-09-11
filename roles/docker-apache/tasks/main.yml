@@ -1,0 +1,72 @@
+---
+
+
+- name: Make sure docker-pythin RPM is not installed
+  yum:
+      name: docker-python
+      state: present
+
+- name: Make sure system is up to date
+  yum:
+      name: '*'
+      state: latest
+
+- name: Install docker
+  yum:
+      name: docker
+
+- name: Install Python-pip
+  yum: 
+      name: "{{ item }}"
+      state: present
+  with_items:
+      - python-pip
+
+- name: Install required PyPi Pachages
+  pip:
+      name: "{{ item }}"
+      state: present
+  with_items:
+      - docker
+      - docker-py==1.7.0
+      - docker-compose>=1.7.0
+      - six>=1.4.0
+
+- name: Start docker service and enable it
+  service:
+      name: docker
+      state: restarted
+      enabled: yes
+
+- name: Include variables
+  include_vars: main.yml
+
+- name: Create Container
+  docker_container:
+    name: "{{ name }}"
+    image: "{{ image }}"
+    ports:
+      - "{{ src_port }}:{{ dest_port }}"
+    volumes:
+      - "{{ src_vol }}:{{ dest_vol }}"
+    privileged: "{{ privileged }}"
+
+- name: Create Systemd file as docker-{{ name }}.service
+  template:
+    src: systemd.j2
+    dest: /etc/systemd/system/docker-{{ name }}.service
+
+
+- name: Reload systemd daemon
+  command: systemctl daemon-reload
+
+- name: Start and Enable docker-{{ name }}.service
+  service:
+    name: docker-{{ name }}
+    state: started
+    enabled: yes
+
+- name: check container status
+  command: docker ps
+  register: result
+- debug: var=result.stdout
