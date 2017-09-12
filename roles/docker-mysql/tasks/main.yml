@@ -1,15 +1,8 @@
-- name: install pip pkg.
-  yum:
-    name: python-pip
-    state: present
-
-- name: install boto pkg.
-  pip:
-    name: docker-py
-    state: present
-
-- name: docker
+- name: "Launch database container"
   docker:
-    image: "mysql:5.5"
-    state: running
-    env: "MYSQL_ROOT_PASSWORD=root101"
+   name: mysql
+   image: mariadb
+   env:
+     MYSQL_ROOT_PASSWORD: example
+   ports: 
+     - 8080:80
