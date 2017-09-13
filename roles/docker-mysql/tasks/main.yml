@@ -1,8 +1,10 @@
-- name: "Launch database container"
-  docker:
-   name: mysql
-   image: mariadb
-   env:
-     MYSQL_ROOT_PASSWORD: example
-   ports: 
-     - 8080:80
+---
+
+- name: Install docker on Server
+  yum:
+    name: "{{ item }}"
+  with_items: 
+    - docker
+
+- name: Run Docker MySql container
+  command: docker run --detach --name=test-mysql --env="MYSQL_ROOT_PASSWORD=root101" --publish 6603:3306 mysql
