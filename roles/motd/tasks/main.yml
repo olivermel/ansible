@@ -1,0 +1,22 @@
+---
+
+- name: Copy Message Of The Day file to /etc/motd
+  template:
+    src: motd.j2
+    dest: "{{ motd_file }}"
+
+- name: Copy Warning file before login /etc/issue.net
+  template:
+    src: issue.net.j2
+    dest: "{{ issue_file }}"
+
+- name: Enable Banners in sshd config file
+  lineinfile:
+    path: "{{ ssh_file}}"
+    regexp: Banner
+    line: Banner {{ issue_file }}
+
+- name: Restart ssh daemon
+  service:
+    name: sshd
+    state: restarted

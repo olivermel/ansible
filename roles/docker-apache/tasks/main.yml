@@ -1,7 +1,7 @@
 ---
 
 
-- name: Make sure docker-pythin RPM is not installed
+- name: Make sure docker-pythin RPM is installed
   yum:
       name: docker-python
       state: present

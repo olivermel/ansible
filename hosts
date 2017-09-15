@@ -19,7 +19,7 @@
 
 [servers]
 host1 ansible_ssh_host=165.227.89.163
-host2 ansible_ssh_host=174.138.57.92 
+host2 ansible_ssh_host=138.197.127.200 
 host3 ansible_ssh_host=172.17.0.1
 
 

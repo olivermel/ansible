@@ -1,0 +1,5 @@
+---
+
+issue_file: /etc/issue.net
+motd_file:  /etc/motd
+ssh_file:   /etc/ssh/sshd_config
