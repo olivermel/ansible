@@ -1,6 +1,20 @@
 - hosts: host2
   remote_user: root
   become_user: yes
+  vars:
+    user_password: "{{ password }}"
+    user_name: "{{ username }}"
+  
   roles:
     - { role: motd}
     - { role: user_manage}
+
+
+
+
+
+## And here is the command used to run and create roles 
+## ansible-playbook motd-users.yml --extra-vars "username=(name of user) password=(password for user action=create_user"
+## 
+#  And to delete users
+#  ansible-playbook motd-users.yml --extra-vars "username=(name of user) action=delete_user" --tags RemoveUsers

@@ -8,7 +8,8 @@
     - htop
     - vim
     - expect
-  tags: installPackages
+    - python-pip
+  tags: AddingUsers
     
 - name: Create groups needed
   group: 
@@ -17,28 +18,30 @@
   with_items:
     - developers
     - admins
-  tags: groups_added
-
-- name: Generate passwords
-  shell: python -c "import crypt; print crypt.crypt("{{ upassword }}", "$6$random_salt")'
-  register: genpass
-
-- name: Users | Create new users
-  user:
-    name: "{{ item }}"
-    password: "{{ genpass.stdout }}"
-    groups: admins, developers
-    shell: /bin/bash
-    update_password: on_create
-  with_items:
-    - user1
-    - user2
-    - user3
   tags: AddingUsers
 
-- name: Deleting users
+- name: Generate passwords
+  #shell: python -c 'import crypt; print crypt.crypt("{{ password }}", "$6$random_salt")'
+  shell: python -c "from passlib.hash import sha512_crypt; print sha512_crypt.encrypt('<password>')"
+  register: genpass
+  tags: AddingUsers
+
+- name: Creating user "{{ username }}"
+  user:
+    name: "{{ username }}"
+    #password: "{{ genpass.stdout }}"
+    password: "{{ upassword |password_hash(‘sha512’) }}"
+    groups: admins, developers
+    update_password: on_create
+  tags: AddingUsers
+
+- name: Expiring passwords immediately for "{{ username }}"
+  command: chage -d0 "{{ username }}" 
+  tags: AddingUsers
+
+- name: Deleting user "{{ username }}"
   user: 
-    name: []
+    name: "{{ username }}"
     state: absent
     remove: yes
-
+  tags: RemoveUsers
