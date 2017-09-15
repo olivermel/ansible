@@ -1,0 +1,44 @@
+---
+
+- name: Install common user software requirements
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - htop
+    - vim
+    - expect
+  tags: installPackages
+    
+- name: Create groups needed
+  group: 
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - developers
+    - admins
+  tags: groups_added
+
+- name: Generate passwords
+  shell: python -c "import crypt; print crypt.crypt("{{ upassword }}", "$6$random_salt")'
+  register: genpass
+
+- name: Users | Create new users
+  user:
+    name: "{{ item }}"
+    password: "{{ genpass.stdout }}"
+    groups: admins, developers
+    shell: /bin/bash
+    update_password: on_create
+  with_items:
+    - user1
+    - user2
+    - user3
+  tags: AddingUsers
+
+- name: Deleting users
+  user: 
+    name: []
+    state: absent
+    remove: yes
+
