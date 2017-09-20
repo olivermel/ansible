@@ -1,0 +1,4 @@
+[servers]
+host1 ansible_ssh_host=165.227.89.163
+
+

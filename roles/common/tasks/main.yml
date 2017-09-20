@@ -6,4 +6,4 @@
   with_items:
     - expect
     - vim
-    - pip
+    - python-pip
