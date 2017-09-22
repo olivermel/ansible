@@ -1,0 +1,14 @@
+---
+
+- name: Add EPEL repository to ALL server
+  yum:
+     name: "{{ item }}"
+     state: present
+  with_items:
+     - epel-release.noarch 
+
+- name: Make sure system is up to date
+  yum:
+     name: '*'
+     state: latest
+

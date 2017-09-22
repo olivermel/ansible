@@ -22,15 +22,17 @@
   with_items:
       - python-pip
 
+- name: Upgrade pip
+  command: pip install --upgrade pip
+
 - name: Install required PyPi Pachages
   pip:
-      name: "{{ item }}"
+      name: "{{ item.name }}"
       state: present
   with_items:
-      - docker
-      - docker-py==1.7.0
-      - docker-compose>=1.7.0
-      - six>=1.4.0
+      - { name: docker, version: 2.0.0 }
+      - { name: docker-py, version: 1.10.6 }
+      #- six>=1.4.0
 
 - name: Start docker service and enable it
   service:
