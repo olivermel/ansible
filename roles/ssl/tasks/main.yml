@@ -1,0 +1,46 @@
+---
+
+- name: Open port 80 and 443
+  firewalld:
+    service: "{{ item }}"
+    permanent: true
+    state: enabled
+  with_items:
+    - http
+    - https
+
+- name: Install Mod SSL
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items: 
+    - mod_ssl
+
+- name: Create the necessary Directories
+  file:
+    path: "{{ ssl_directory }}"
+    state: directory
+    mode: 0755
+
+- name: Create a self signed certificate
+  command: openssl req -new -nodes -x509  -subj "/C=US/ST=Maryland/L=SilverSpring/O=IT/CN=165.227.179.170" -days 3650 -keyout /etc/httpd/ssl/apache.key -out /etc/httpd/ssl/apache.crt
+  notify: restart apache
+
+- name: Get template of ssl.conf file
+  template:
+    src: ssl.conf.j2
+    dest: "{{ ssl_conf_directory }}/ssl.conf"
+  notify: restart apache
+
+- name: Redirect unencrypted HTTP to encrypted HTTPS traffic
+  template:
+    src: non-ssl.conf.j2
+    dest: "{{ ssl_conf_directory }}/non-ssl.conf"
+
+- name: Test configuration
+  command: apachectl configtest
+  register: shell_result
+
+- debug:
+     var: shell_result.stdout_lines
+  notify: restart apache

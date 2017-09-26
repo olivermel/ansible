@@ -1,14 +1,4 @@
 ---
-#- hosts: host2
-#  user: root
-#  tasks:
-
-- name: Install EPEL Repository
-  command: yum -y install epel-release
-
-- name: Update the Entire system (PATCH SYSTEM).......
-  command: yum update -y
-
 - name: Install Apache
   yum:
     name: "{{ item }}"
@@ -33,6 +23,13 @@
       state: restarted
       enabled: yes
 
+- name: Copy CNF file with root credentials
+  template:
+      src: my.cnf.j2
+      dest: /root/.my.cnf
+      owner: root
+      mode: 0600
+
 - name: Install MariaDB
   yum:
       name: "{{ item }}"
@@ -41,12 +38,20 @@
       - mariadb
       - mariadb-server
 
-- name: Initialize MariaDB 
-  command: "{{ item }}"
-  with_items:
-      - mysql_install_db
-      - mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/
-      - mysql_secure_installation
+#- name: Check if DB exists
+#  shell: mysql -e 'SHOW DATABASES;' | grep mysql
+#  register: dbstatus
+
+- name: Set MySql recursive permissions ooooooooo
+  command: chown -R mysql:mysql /var/lib/mysql
+
+#- name: Initialize MariaDB 
+#  command: "{{ item }}"
+#  with_items:
+#      - mysql_install_db
+#      - mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/
+#  failed_when: dbstatus.rc == 2
+#      - mysql_secure_installation
 
 - name: Start and enable the MariaDB service
   service:
@@ -54,12 +59,12 @@
       state: restarted
       enabled: yes
 
-- name: Copy CNF file with root credentials
-  template:
-      src: my.cnf.j2
-      dest: /root/.my.cnf
-      owner: root
-      mode: 0600
+#- name: Copy CNF file with root credentials
+#  template:
+#      src: my.cnf.j2
+#      dest: /root/.my.cnf
+#      owner: root
+#      mode: 0600
 
 - name: Set Database root password
   mysql_user:
@@ -93,12 +98,14 @@
 - name: Install Icinga@ and its plugins (1)
   command: rpm --import "{{ icinga_key_link }}" 
 
-- name: Install Icinga@ and its plugins (2)
+- name: Install icinga2
+  command: rpm -ivh "{{ icinga_plugin_link }}"
+
+- name: Install Icinga2 plugins
   yum:
       name: "{{ item }}" 
       state: present
   with_items:
-      - "{{ icinga_plugin_link }}"
       - icinga2
       - nagios-plugins-all
 

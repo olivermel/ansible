@@ -2,6 +2,7 @@
   remote_user: root
   become_user: yes
   roles:
+    - { role: common }
     - { role: icinga2 }
-    - { role: docker-apache}
-    - { role: docker-mysql}
+    - { role: docker-apache }
+    - { role: docker-mysql }

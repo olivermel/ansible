@@ -1,0 +1,2 @@
+ssl_directory:          /etc/httpd/ssl
+ssl_conf_directory:     /etc/httpd/conf.d
