@@ -1,14 +1,4 @@
 ---
-
-- name: Open port 80 and 443
-  firewalld:
-    service: "{{ item }}"
-    permanent: true
-    state: enabled
-  with_items:
-    - http
-    - https
-
 - name: Install Mod SSL
   yum:
     name: "{{ item }}"

@@ -1,0 +1,4 @@
+---
+nginx_ssl_directory:            /etc/ssl/private
+nginx_conf_directory:           /etc/nginx/conf.d
+nginx_redirect_directory:       /etc/nginx/default.d

@@ -1,0 +1,33 @@
+---
+- name: Create directory SSL Cert 
+  file:
+    path: "{{ nginx_ssl_directory}}"
+    mode: 0700
+    state: directory
+
+- name: Create SSL Certificate in "{{ nginx_ssl_directory}}"
+  command: openssl req -x509 -nodes -subj "/C=US/ST=Maryland/L=SilverSpring/O=IT/CN=165.227.179.170" -days 3650  -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt
+  notify: restart nginx
+
+- name: Create strong Diffie-Hellman group for negotiating Perfect Forward Secrecy with clients
+  command: openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+
+- name: Create the TLS/SSL Server Block
+  template:
+    src: ssl.conf.j2
+    dest: "{{ nginx_conf_directory }}/ssl.conf"
+  notify: restart nginx
+
+- name: Redirect from HTTP to HTTPS
+  template:
+    src: ssl-redirect.conf.j2
+    dest: "{{ nginx_redirect_directory }}/ssl-redirect.conf"
+  notify: restart nginx
+ 
+- name: Check NginX changes
+  command: nginx -t
+  register: shell_result
+ 
+- debug:
+    var: shell.result.stdout_lines
+  notify: restart nginx 

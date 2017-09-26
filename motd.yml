@@ -1,4 +1,4 @@
-- hosts: host2
+- hosts: all
   remote_user: root
   become_user: yes
 

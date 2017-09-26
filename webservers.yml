@@ -1,0 +1,15 @@
+## This yml file is a dev yml file for testing
+#
+--- 
+- hosts: host3
+  remote_user: root
+  become_user: yes
+
+  roles:
+    - { role: common}
+    - { role: firewalld}
+    - { role: apache}
+    - { role: ssl4apache}
+    - { role: nginx}
+    - { role: ssl4nginx}
+
