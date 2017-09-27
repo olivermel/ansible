@@ -1,0 +1,9 @@
+
+yum install gcc
+yum -y install python-pip
+yum install python-devel
+yum install mysql-devel
+yum install libevent-devel
+yum install openssl-devel libffi-devel
+pip install mysql-python
+
