@@ -12,3 +12,8 @@
 
 - name: Install pexpect using pip
   command: pip install pexpect
+
+- name: Install Development Group of packages
+  yum:
+    name: "@Development tools"
+    state: present

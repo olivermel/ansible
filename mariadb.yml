@@ -1,6 +1,7 @@
-- hosts: host3
+- hosts: host2
   remote_user: root
   become_user: yes
 
   roles:
-    - { role: mysql}
+    - { role: mariadb}
+

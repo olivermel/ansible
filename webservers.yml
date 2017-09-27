@@ -1,7 +1,7 @@
 ## This yml file is a dev yml file for testing
 #
 --- 
-- hosts: host3
+- hosts: host2
   remote_user: root
   become_user: yes
 
