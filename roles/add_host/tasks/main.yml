@@ -1,0 +1,36 @@
+---
+- name: Install Nagios Plugins and NRPE
+  yum:
+    name: "{{ item }}"
+  with_items:
+    - nrpe
+    - nagios-plugins-all
+
+- name: update the NRPE configuration file
+  template:
+    src: nrpe.cfg.j2
+    dest: "{{ nrpe_config_file }}"
+
+- name: Restart NRPE to put the change into effect
+  service:
+    name: nrpe.service
+    state: restarted
+    enabled: yes
+
+- name: Display post install message
+  debug:
+    msg:
+      - 'Things left to do:'
+      - 'Add this host to Nagios Configuration'
+      - 'On main server, go to /usr/local/nagios/etc/servers/yourhost.cfg'
+      - 'Add the following as below'
+      - ' define host {                                                         '
+      - '           use                             linux-server                '
+      - '           host_name                       name of this host           '
+      - '           alias                           whatever alias you desire   '
+      - '           address                         ip of this host             '
+      - '           max_check_attempts              5                           '
+      - '           check_period                    24x7                        '
+      - '           notification_interval           30                          '
+      - '           notification_period             24x7                        '
+      - '   }                                                                   '

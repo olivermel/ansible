@@ -1,0 +1,8 @@
+- hosts: host1
+  remote_user: root
+  become_user: yes
+
+  roles:
+    - { role: common}
+    - { role: add_host}
+

@@ -1,6 +1,0 @@
-- hosts: host2
-  remote_user: root
-  become_user: yes
-
-  roles:
-    - { role: nagios}
