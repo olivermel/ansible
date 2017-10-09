@@ -9,6 +9,7 @@
     - python-pip
     - tree
     - psmisc
+    - python-pip
 
 - name: Install pexpect using pip
   command: pip install pexpect

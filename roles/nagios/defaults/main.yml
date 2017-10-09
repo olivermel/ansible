@@ -1,0 +1,19 @@
+---
+nagios_url:             https://assets.nagios.com/downloads/nagioscore/releases/nagios-4.1.1.tar.gz
+nagios_tar_file:        nagios-4.1.1.tar.gz
+nagios_untar_dir:       nagios-4.1.1
+
+nagios_plugin_url:      http://nagios-plugins.org/download/nagios-plugins-2.1.1.tar.gz
+nagios_plugin_dir:      nagios-plugins-2.1.1
+
+nrpe_url:               http://downloads.sourceforge.net/project/nagios/nrpe-2.x/nrpe-2.15/nrpe-2.15.tar.gz
+nrpe_dir:               nrpe-2.15
+
+nagios_conf_file:       /usr/local/nagios/etc/nagios.cfg
+nagios_server_dir:      /usr/local/nagios/etc/servers
+
+contacts_cfg_file:      /usr/local/nagios/etc/objects/contacts.cfg
+xinetd_config_file:     /etc/xinetd.d/nrpe
+commands_config_file:   /usr/local/nagios/etc/objects/commands.cfg
+htpasswd_file:          /usr/local/nagios/etc/htpasswd.users
+nagios_admin_password:  admin101

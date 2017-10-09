@@ -1,0 +1,138 @@
+---
+- name: Install required packages for Nagios as we are building Nagios Core from source
+  yum:
+    name: "{{ item}}"
+    state: present
+  with_items: 
+    - gcc
+    - glibc
+    - glibc-common
+    - gd
+    - gd-devel
+    - make
+    - net-snmp 
+    - openssl-devel 
+    - xinetd 
+    - unzip
+    - python-pip
+
+- name: Create Nagios group
+  group:
+    name: nagcmd
+    state: present
+
+- name: Create Nagios User and Group
+  command: usermod -a -G nagcmd nagios
+
+- name: Download Nagios tarball
+  unarchive:
+    src: "{{ nagios_url }}"
+    dest: /tmp
+    remote_src: yes
+
+- name: Change into extracted directory and run configure command
+  command: ' "{{ item }}" chdir=/tmp/{{ nagios_untar_dir }}'
+  with_items: 
+    - ./configure
+
+- name: Build Nagios4.1.1 with the following make commands to create init scripts and sample config files
+  shell: "{{ item }}" 
+  args: 
+    chdir: "/tmp/{{ nagios_untar_dir }}"
+  with_items:
+    - make all
+    - make install
+    - make install-commandmode
+    - make install-init
+    - make install-config
+    - make install-webconf
+
+- name: Add the web server user, apache, to the nagcmd group
+  user: 
+    name: apache
+    groups: nagcmd
+    append: yes
+
+- name: Download and untar Nagios Plugins
+  unarchive:
+    src: "{{ nagios_plugin_url }}"
+    dest: /tmp
+    remote_src: yes
+
+
+- name: Change into Nagios plugins extracted directory and run configure command
+  shell: "{{ item }}" 
+  args:
+    chdir: "/tmp/{{ nagios_plugin_dir }}"
+  with_items:
+    - ./configure --with-nagios-user=nagios --with-nagios-group=nagios --with-openssl
+    - make
+    - make install
+
+- name: Dowload and install NRPE
+  unarchive:
+    src: "{{ nrpe_url }}"
+    dest: /tmp
+    remote_src: yes
+
+- name: Change into NRPE extracted directory and run following commands
+  shell: "{{ item }}"
+  args: 
+    chdir: "/tmp/{{ nrpe_dir }}"
+  with_items:
+    - ./configure --enable-command-args --with-nagios-user=nagios --with-nagios-group=nagios --with-ssl=/usr/bin/openssl --with-ssl-lib=/usr/lib/x86_64-linux-gnu
+    - make all
+    - make install
+    - make install-xinetd
+    - make install-daemon-config
+
+- name: Copy modified nrpe config file into server
+  template:
+    src: nrpe.j2
+    dest: "{{ xinetd_config_file }}"
+
+- name: Restart Xinetd.d service
+  service:
+    name: xinetd
+    state: restarted
+
+- name: Copy modified nagios.cfg to {{ nagios_conf_file }}
+  template: 
+    src: nagios.cfg.j2
+    dest: "{{ nagios_conf_file }}"
+
+
+- name: Create Nagios servers directory
+  file:
+    path: "{{ nagios_server_dir }}"
+    state: directory
+    mode: 0755
+
+- name: Copy modified contact file
+  template:
+    src: contacts.cfg.j2
+    dest: "{{ contacts_cfg_file }}"
+
+- name: Configure check_nrpe Command
+  template:
+    src: commands.cfg.j2
+    dest: "{{ commands_config_file }}"
+
+- name: Install passlib
+  command: pip install passlib
+
+- name: Configure Apache
+  htpasswd:
+    path: "{{ htpasswd_file }}"
+    name: nagiosadmin
+    password: "{{ nagios_admin_password }}"
+ 
+- name: Reload system daemon
+  command: systemctl daemon-reexec
+
+- name: Start Nagios service
+  service:
+    name: nagios
+    state: started
+    enabled: yes
+  notify: restart apache

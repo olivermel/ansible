@@ -1,0 +1,10 @@
+- hosts: host2
+  remote_user: root
+  become_user: yes
+
+  roles:
+    - { role: common}
+    - { role: apache}
+    - { role: mysql}
+    - { role: php}
+    - { role: nagios}
