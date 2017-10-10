@@ -1,0 +1,21 @@
+---
+
+- name: Add EPEL repository to ALL server
+  yum:
+     name: "{{ item }}"
+     state: present
+  with_items:
+     - epel-release.noarch 
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: Make sure system is up to date
+  yum:
+     name: '*'
+     state: latest
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: (Debian) Make sure systems are up to date
+  apt:
+    upgrade: dist
+  when: ansible_distribution == 'Debian'
+

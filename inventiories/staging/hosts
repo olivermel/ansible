@@ -1,6 +1,6 @@
 [servers]
-host1 ansible_ssh_host=104.131.84.50
-host2 ansible_ssh_host=159.203.185.27
+host1 ansible_ssh_host=165.227.88.53
+debby ansible_ssh_host=139.59.210.145
 
 
 

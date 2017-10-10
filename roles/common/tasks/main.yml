@@ -1,5 +1,5 @@
 ---
-- name: Install packages needed for ALL servers
+- name: (CentOS) Install packages needed for ALL servers
   yum:
     name: "{{ item }}"
     state: present
@@ -10,11 +10,33 @@
     - tree
     - psmisc
     - python-pip
+    - htop
+    - tree
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
 
-- name: Install pexpect using pip
+- name: (CentOS) Install pexpect using pip
   command: pip install pexpect
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
 
-- name: Install Development Group of packages
+- name: (CentOS) Install Development Group of packages
   yum:
     name: "@Development tools"
     state: present
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: (Debian) Install packages needed for ALL server
+  apt:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - htop
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: (Debian) Install Development Tools
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - build-essential
+    - manpages-dev
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
