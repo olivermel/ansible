@@ -1,0 +1,67 @@
+---
+- name: Install snmp and mrtg packages
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - net-snmp
+    - net-snmp-utils
+    - mrtg
+
+- name: Start snmpd
+  service:
+    name: snmpd
+    state: started
+
+- name: Create a backup of snmpd.conf
+  command: cp {{ mrtg_snmpd_file }} {{ mrtg_snmpd_file_backup }}
+
+- name: Edit the {{ mrtg_snmpd_file }} configuration file
+  template:
+    src: snmpd.conf.j2
+    dest: "{{ mrtg_snmpd_file }}"
+  notify: restart snmp
+
+- name: Enable snmpd at boot time
+  service:
+    name: snmpd
+    enabled: yes
+  notify: restart snmp
+
+- name: Run snmpwalk command
+  shell: snmpwalk -v2c -c olivermel localhost system
+  register: snmpwalk
+- debug:
+    var: snmpwalk.stdout_lines
+
+- name: Create MRTG configuration
+  command: "cfgmaker --snmp-options=:::::2 --ifref=descr --ifdesc=descr --global 'WorkDir: /var/www/html/mymrtg' olivermel@165.227.76.136 > /etc/mrtg/mrtg.cfg"
+  register: mrtgconfig
+- debug:
+    var: mrtgconfig.stdout_lines
+
+- name: Display the following message for users running this ansible playbook
+  debug:
+    msg:
+    - If you want the graph data in bits instead of bytes , uncomment the below lines from /etc/mrtg/mrtg.cfg configuration file
+    - Then edit with vim the {{ mrtg_config_file }} file and change    Options[_]: growright, bits
+
+- name: Create MRTG index file directory
+  file:
+    path: "{{ mrtg_index_dir }}"
+    state: directory
+
+- name: Uncomment Target line
+  lineinfile:
+    dest: "{{ mrtg_config_file }}"
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+    - { regexp: 'Target',   line: 'Target[165.227.76.136_lo]: \lo:olivermel@165.227.76.136:::::2' }
+    - { regexp: 'SetEnv',   line: 'SetEnv[165.227.76.136_lo]: MRTG_INT_IP="127.0.0.1" MRTG_INT_DESCR="lo"' }
+    - { regexp: 'MaxBytes', line: 'MaxBytes[165.227.76.136_lo]: 1250000' }
+    - { regexp: 'Title' ,   line: 'Title[165.227.76.136_lo]: lo -- host2.olivermel.com' }
+    - { regexp: 'PageTop',  line: 'PageTop[165.227.76.136_lo]: <h1>lo -- host2.olivermel.com</h1>' } 
+  
+- name: Create an index file in MRTG document root
+  command: indexmaker --columns= {{ mrtg_config_file }} > {{ mrtg_index_file }}

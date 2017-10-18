@@ -1,0 +1,6 @@
+---
+mrtg_snmpd_file:        /etc/snmp/snmpd.conf
+mrtg_snmpd_file_backup: /etc/snmp/snmpd.conf-backup
+mrtg_config_file:       /etc/mrtg/mrtg.cfg
+mrtg_index_file:        /var/www/html/mymrtg/index.html
+mrtg_index_dir:         /var/www/html/mymrtg
