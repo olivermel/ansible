@@ -72,11 +72,12 @@ access  notConfigGroup ""      any       noauth    exact  systemview none none
 
 ##       sec.name  source          community
 com2sec local     localhost       olivermel
-com2sec mynetwork 165.227.64.0/20 olivermel
+com2sec mynetwork 104.236.64.0/18 olivermel
 
 ##     group.name sec.model  sec.name
-group MyRWGroup  v2c	local
+group MyRWGroup  v1	local
 group MyROGroup  v2c	mynetwork
+group MyRWGroup  usm    local
 #
 #group MyRWGroup  any        otherv3user
 #...
@@ -90,8 +91,9 @@ view all    included  .1                               80
 
 
 ##                context sec.model sec.level prefix read   write  notif
-access MyROGroup ""      v2c	noauth    0      all    none   none
-access MyRWGroup ""      v2c    noauth    0      all    all    all
+access MyROGroup ""      v2c	noauth    exact  all    none   none
+access MyRWGroup ""      any    noauth    exact  all    all    none
+#access MyRWGroup ""      v2c    noauth    0      all    all    all
 
 
 ###############################################################################
@@ -460,3 +462,5 @@ dontLogTCPWrappersConnects yes
 # Further Information
 #
 #  See the snmpd.conf manual page, and the output of "snmpd -H".
+rocommunity public
+rwcommunity public

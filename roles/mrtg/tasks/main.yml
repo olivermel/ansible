@@ -1,4 +1,9 @@
 ---
+- name: Start the Apache service
+  service:
+    name: httpd
+    state: started
+
 - name: Install snmp and mrtg packages
   yum:
     name: "{{ item }}"
@@ -28,14 +33,16 @@
     enabled: yes
   notify: restart snmp
 
-- name: Run snmpwalk command
-  shell: snmpwalk -v2c -c olivermel localhost system
+- name: Run snmpwalk command to see the interfaces
+#  shell: snmpwalk -v2c -c olivermel localhost system
+  shell: snmpwalk -v 1 -c public localhost IP-MIB::ipAdEntIfIndex
   register: snmpwalk
 - debug:
     var: snmpwalk.stdout_lines
 
 - name: Create MRTG configuration
-  command: "cfgmaker --snmp-options=:::::2 --ifref=descr --ifdesc=descr --global 'WorkDir: /var/www/html/mymrtg' olivermel@165.227.76.136 > /etc/mrtg/mrtg.cfg"
+#  command: "cfgmaker --snmp-options=:::::2 --ifref=descr --ifdesc=descr --global 'WorkDir: /var/www/html/mymrtg' olivermel@165.227.76.136 > /etc/mrtg/mrtg.cfg"
+  command: " cfgmaker --global 'WorkDir: /var/www/mrtg' --output /etc/mrtg/mrtg.cfg public@localhost "
   register: mrtgconfig
 - debug:
     var: mrtgconfig.stdout_lines
@@ -46,7 +53,7 @@
     - If you want the graph data in bits instead of bytes , uncomment the below lines from /etc/mrtg/mrtg.cfg configuration file
     - Then edit with vim the {{ mrtg_config_file }} file and change    Options[_]: growright, bits
 
-- name: Create MRTG index file directory
+- name: Create MRTG index file directory 
   file:
     path: "{{ mrtg_index_dir }}"
     state: directory
@@ -62,6 +69,6 @@
     - { regexp: 'MaxBytes', line: 'MaxBytes[165.227.76.136_lo]: 1250000' }
     - { regexp: 'Title' ,   line: 'Title[165.227.76.136_lo]: lo -- host2.olivermel.com' }
     - { regexp: 'PageTop',  line: 'PageTop[165.227.76.136_lo]: <h1>lo -- host2.olivermel.com</h1>' } 
-  
-- name: Create an index file in MRTG document root
-  command: indexmaker --columns= {{ mrtg_config_file }} > {{ mrtg_index_file }}
+
+- name: Create index file (web pages which display the status of an array of mrtg interface status pages)
+  command: indexmaker --output=/var/www/mrtg/index.html {{ mrtg_config_file }}
