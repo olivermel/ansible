@@ -1,0 +1,16 @@
+---
+- name: Install Spacewalk client packages
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "{{ spacewalk_client_repo }}"
+    - "{{ fedora_repo }}"
+    - rhn-client-tools 
+    - rhn-check 
+    - rhn-setup 
+    - rhnsd 
+    - m2crypto 
+    - yum-rhn-plugin
+    - "{{ spacewalk_server_cert }}"
+

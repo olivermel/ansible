@@ -1,0 +1,9 @@
+- hosts: all
+  remote_user: root
+
+  roles:
+    - { role: epel}
+    - { role: spacewalk-repo}
+    - { role: java}
+    - { role: spacewalk-clients}
+
