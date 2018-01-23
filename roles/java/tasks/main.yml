@@ -1,0 +1,5 @@
+---
+- name: Configure Java respositories for getting dependecies for Spacewalk installation
+  get_url:
+    url: "{{ java_repo }}"
+    dest: "{{ local_repo_dir }}"

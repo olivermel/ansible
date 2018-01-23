@@ -1,0 +1,11 @@
+---
+- name: Install PostgreSQL database
+  yum:
+    name: "{{ item }}"
+  with_items:
+    - spacewalk-setup-postgresql
+    - spacewalk-postgresql
+
+- name: Initialize postgreSQL database before installation
+  shell: postgresql-setup initdb > /tmp/pgres.log
+  ignore_errors: yes

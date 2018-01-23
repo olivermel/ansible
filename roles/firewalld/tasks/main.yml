@@ -1,25 +1,6 @@
 ---
-- name: Install Firewalld
-  yum:
-    name: "{{ item }}"
-    state: present
-  with_items: 
-    - firewalld
-
-- name: Ensure Firewall is running
-  service:
-    name: firewalld
-    state: started
-
-- name: Open Port 80 and 443
+- name: Enable HTTPS
   firewalld:
-    service: "{{ item }}"
+    service: https
     permanent: true
     state: enabled
-  with_items:
-    - http
-    - https
-
-- name: Open port 8080
-  command: firewall-cmd --permanent --add-port=8080/tcp
-  notify: restart firewalld

@@ -1,0 +1,30 @@
+---
+- name: Open http and https ports
+  shell: firewall-cmd --permanent --add-service=http ; firewall-cmd --permanent --add-service=https
+  notify: restart firewalld
+
+- name: Install ansible
+  yum:
+    name: "{{ item }}"
+  with_items:
+    - ansible
+
+- name: Create local directory for answers file
+  file:
+    path: /etc/ansible/roles/spacewalk/templates
+    state: directory
+
+- name: Copy answers file
+  template:
+    src: spacewalk-file.j2
+    dest: /tmp/spacewalk-file
+
+- name: Open ports 5222 and 5269 for push actions to Spacewalk proxy (WE MAY NOT NEED THIS)
+  shell: firewall-cmd --permanent --add-port=5222/tcp ; firewall-cmd --permanent --add-port=5269/tcp
+  notify: restart firewalld
+
+- name: Configuring Spacewalk with an Answer file
+  shell: creates="/tmp/done" spacewalk-setup --answer-file=/tmp/spacewalk-file
+
+
+# use this command to delete postgres stuffs rm -rf /var/lib/pgsql/9.2/data

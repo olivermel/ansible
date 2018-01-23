@@ -1,0 +1,4 @@
+---
+spacewalk_repo:         http://yum.spacewalkproject.org/2.7/RHEL/7/x86_64/spacewalk-repo-2.7-2.el7.noarch.rpm
+java_repo:              https://copr.fedorainfracloud.org/coprs/g/spacewalkproject/java-packages/repo/epel-7/group_spacewalkproject-java-packages-epel-7.repo
+local_repo_dir:         /etc/yum.repos.d

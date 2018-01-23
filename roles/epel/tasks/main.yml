@@ -1,0 +1,7 @@
+---
+- name: Set up CentOS 7 EPEL repository
+  yum:
+    name: "{{ item }}"
+  with_items:
+    - epel-release.noarch
+

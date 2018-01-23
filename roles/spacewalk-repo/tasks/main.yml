@@ -1,0 +1,5 @@
+---
+- name: Download and install the spacewalk repository
+  yum:
+    name: "{{ spacewalk_repo }}"
+    state: present

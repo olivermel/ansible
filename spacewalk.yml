@@ -1,0 +1,20 @@
+- hosts: nm-spacewalk.nascom.nasa.gov
+  remote_user: root
+
+  roles:
+    - { role: epel}
+    - { role: spacewalk-repo}
+    - { role: java}
+    - { role: postgres}
+    - { role: spacewalk}
+
+# after downloading and installing the spacewalk application
+# Go to create channel 
+# fill in the necessary parameters 
+# for the  GPG keys, cd into /etc/pki/rpm-gpg/ directory and run the following 
+#
+#       gpg --with-fingerprint {CHOOSE FILE YOU WANT} 
+#       gpg --with-fingerprint RPM-GPG-KEY-CENTOS-7
+#       
+#       get last 6 for GPG key ID
+#       and everything for GPG key Fingerprint
